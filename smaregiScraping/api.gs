@@ -12,37 +12,42 @@ function doPost(e) {
   const transactions =parameters.transactions; // 取引数
   const customers = parameters.customers; // 客数
   const pricePerCustomer = parameters.pricePerCustomer; // 客単価
+  const numberOfSales = parameters.numberOfSales; // 販売数
   
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(buildingName);
-  
+
   const lastRow = sheet.getLastRow();
   // stringにしないと勝手にdate形に変換されて厄介
   const date = sheet.getRange(lastRow, 1).setNumberFormat('@').getValue();
 
   if (date === targetDate) {
-    sheet.getRange(lastRow, 2).setValue(brandName);
-    sheet.getRange(lastRow, 3).setValue(sales);
-    sheet.getRange(lastRow, 4).setValue(salesWithoutTax);
-    sheet.getRange(lastRow, 5).setValue(cash);
-    sheet.getRange(lastRow, 6).setValue(credit);
-    sheet.getRange(lastRow, 7).setValue(other);
-    sheet.getRange(lastRow, 8).setValue(transactions);
-    sheet.getRange(lastRow, 9).setValue(customers);
-    sheet.getRange(lastRow, 10).setValue(pricePerCustomer);
+    sheet.getRange(lastRow, 2).setValue(targetDate);
+    sheet.getRange(lastRow, 3).setValue(brandName);
+    sheet.getRange(lastRow, 4).setValue(sales);
+    sheet.getRange(lastRow, 5).setValue(salesWithoutTax);
+    sheet.getRange(lastRow, 6).setValue(cash);
+    sheet.getRange(lastRow, 7).setValue(credit);
+    sheet.getRange(lastRow, 8).setValue(other);
+    sheet.getRange(lastRow, 9).setValue(transactions);
+    sheet.getRange(lastRow, 10).setValue(customers);
+    sheet.getRange(lastRow, 11).setValue(pricePerCustomer);
+    sheet.getRange(lastRow, 12).setValue(numberOfSales);
   } else {
     const nextRow = lastRow + 1;
     sheet.getRange(nextRow, 1).setNumberFormat('@').setValue(targetDate);
-    sheet.getRange(nextRow, 2).setValue(brandName);
-    sheet.getRange(nextRow, 3).setValue(sales);
-    sheet.getRange(nextRow, 4).setValue(salesWithoutTax);
-    sheet.getRange(nextRow, 5).setValue(cash);
-    sheet.getRange(nextRow, 6).setValue(credit);
-    sheet.getRange(nextRow, 7).setValue(other);
-    sheet.getRange(nextRow, 8).setValue(transactions);
-    sheet.getRange(nextRow, 9).setValue(customers);
-    sheet.getRange(nextRow, 10).setValue(pricePerCustomer);
+    sheet.getRange(nextRow, 2).setValue(targetDate);
+    sheet.getRange(nextRow, 3).setValue(brandName);
+    sheet.getRange(nextRow, 4).setValue(sales);
+    sheet.getRange(nextRow, 5).setValue(salesWithoutTax);
+    sheet.getRange(nextRow, 6).setValue(cash);
+    sheet.getRange(nextRow, 7).setValue(credit);
+    sheet.getRange(nextRow, 8).setValue(other);
+    sheet.getRange(nextRow, 9).setValue(transactions);
+    sheet.getRange(nextRow, 10).setValue(customers);
+    sheet.getRange(nextRow, 11).setValue(pricePerCustomer);
+    sheet.getRange(nextRow, 12).setValue(numberOfSales);
   }
-  
+
   return ContentService.createTextOutput(JSON.stringify({ meta: { status: "success" }})).setMimeType(ContentService.MimeType.JSON);
 }
 

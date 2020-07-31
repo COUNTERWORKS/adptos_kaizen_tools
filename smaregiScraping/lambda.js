@@ -3,12 +3,14 @@ const https = require('https');
 const puppeteer = chromium.puppeteer;
 
 exports.handler = async(event, context) => {
+
     const browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath,
         headless: chromium.headless,
     });
+
 
     let page = await browser.newPage();
 
@@ -36,6 +38,36 @@ exports.handler = async(event, context) => {
     const date = year + '/' + month + '/' + day;
 
     let target;
+    
+    
+    const table = await page.$$('table[summary]');
+    const thead = await table[1].$$('thead');
+
+    const tr = await thead[1].$$('tr');
+    const th = await tr[1].$$('th');
+    
+    let otherIndex;
+    let creditIndex;
+    let cashIndex;
+    const baseIndex = th.length;
+    let number = 0;
+
+    for (const node of th) {
+        number++;
+        switch (await (await node.getProperty('textContent')).jsonValue()) {
+            case "その他":
+                otherIndex = number;
+                break;
+            case "現金":
+                cashIndex = number;
+                break;
+            case "クレジット":
+                creditIndex = number;
+                break;
+            default:
+                break;
+        }
+    }
 
     for (const node of list) {
         const day = await (await (await node.$('span.ymd')).getProperty('textContent')).jsonValue();
@@ -51,12 +83,13 @@ exports.handler = async(event, context) => {
                     "brandName": brandName,
                     "sales": await (await (_node[0].getProperty('textContent'))).jsonValue(),
                     "salesWithoutTax": await (await (_node[1].getProperty('textContent'))).jsonValue(),
-                    "cash": await (await (_node[6].getProperty('textContent'))).jsonValue(),
-                    "credit": await (await (_node[7].getProperty('textContent'))).jsonValue(),
-                    "other": await (await (_node[8].getProperty('textContent'))).jsonValue(),
+                    "cash": await (await (_node[2+cashIndex].getProperty('textContent'))).jsonValue(),
+                    "credit": await (await (_node[2+creditIndex].getProperty('textContent'))).jsonValue(),
+                    "other": await (await (_node[2+otherIndex].getProperty('textContent'))).jsonValue(),
                     "transactions": await (await (__node[1].getProperty('textContent'))).jsonValue(),
                     "customers": await (await (__node[2].getProperty('textContent'))).jsonValue(),
-                    "pricePerCustomer": await (await (_node[13].getProperty('textContent'))).jsonValue(),
+                    "pricePerCustomer": await (await (_node[2+baseIndex+4].getProperty('textContent'))).jsonValue(),
+                    "numberOfSales": await (await (__node[0].getProperty('textContent'))).jsonValue(),
                 };
             }
         }
@@ -72,6 +105,7 @@ exports.handler = async(event, context) => {
 };
 
 // これどっかのさいとのコピペ
+
 async function sendRequest(sendData){
     return new Promise(((resolve,reject)=>{
         console.log('Promiseの引数の関数開始');
